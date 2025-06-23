@@ -1,19 +1,14 @@
-### CircuitBreakerConfig(failure_threshold: int = 5, recovery_timeout: int = 60, success_threshold: int = 3)
-- `failure_threshold`: Number of failures before opening the circuit.
-- `recovery_timeout`: Seconds to wait before moving from OPEN to HALF_OPEN state.
-- `success_threshold`: Required successes in HALF_OPEN to close the circuit.
-
 ### CircuitBreaker(config: CircuitBreakerConfig)
-- `config`: Configuration object for the circuit breaker.
+- `config`: Configuration settings for the circuit breaker (thresholds, timeouts).
 
 #### can_execute(self) -> bool
-- No parameters. Returns whether operations are allowed based on current state.
+- Returns whether an operation can be executed based on current circuit breaker state.
 
 #### record_success(self)
-- No parameters. Records a successful operation and updates state accordingly.
+- Records a successful operation attempt, updating the state as needed.
 
 #### record_failure(self)
-- No parameters. Records a failed operation and updates state accordingly.
+- Records a failed operation attempt, updating the state as needed.
 
 ### AsyncMongoDBRepository(
     connection_string: str,
@@ -29,123 +24,121 @@
     w: Union[int, str] = "majority",
     read_preference: str = "primaryPreferred"
 )
-- `connection_string`: MongoDB URI string.
-- `db_name`: Database name.
-- `collection_name`: Collection name within database.
-- `max_pool_size`: Maximum connections in pool.
-- `min_pool_size`: Minimum connections in pool.
-- `max_idle_time_ms`: Max idle time for connections (ms).
-- `connect_timeout_ms`: Timeout for initial connection (ms).
-- `socket_timeout_ms`: Timeout for sockets (ms).
-- `server_selection_timeout_ms`: How long to try servers (ms).
-- `retry_writes`: Whether retryable writes enabled.
-- `w`: Write concern; can be integer or string ("majority", etc.).
-- `read_preference`: Read preference strategy ("primary", etc.).
+- `connection_string`: MongoDB URI used to connect.
+- `db_name`: Target database name.
+- `collection_name`: Target collection name.
+- `max_pool_size`: Maximum connections allowed in pool.
+- `min_pool_size`: Minimum number of connections maintained in pool.
+- `max_idle_time_ms`: Time (ms) before idle pooled connections are closed.
+- `connect_timeout_ms`: Connection timeout (ms).
+- `socket_timeout_ms`: Socket timeout (ms).
+- `server_selection_timeout_ms`: MongoDB server selection timeout (ms).
+- `retry_writes`: Whether to enable retryable writes.
+- `w`: Write concern value or string ("majority" etc.).
+- `read_preference`: Read preference mode.
 
 #### health_check(self) -> Awaitable[bool]
- - No parameters. Returns True if the DB is healthy, else False.
+- Performs a database health check and returns result asynchronously.
 
 #### _sanitize_input(self, data: Dict) -> Dict
- - 'data': Input dictionary to sanitize against injection attacks.
+- Sanitizes input dictionary by stripping potentially dangerous keys/values recursively.
 
 #### _generate_content_hash(self, content: str) -> str
- - 'content': String content used for hash generation.
+- Generates SHA256 hash string from provided content string.
 
-#### _convert_object_ids(self, data: Any) -> Any
- - 'data': Data structure with possible ObjectIds; converts them recursively to strings.
+#### _convert_object_ids(self, data)
+ - Recursively converts ObjectId instances within input to strings for serialization.
 
 #### _validate_object_id(self, obj_id: str) -> ObjectId
- - 'obj_id': ID string expected as valid MongoDB ObjectId or raises ValidationError on invalid input.
+ - Validates and converts a string into BSON ObjectId type; raises if invalid.
 
 #### _with_retry(
-        self,
-        operation: Callable[[], Awaitable[Any]],
-        max_retries: int = 3,
-        base_delay: float = 1.0,
-        max_delay=float(60.0),
-        exponential_base=float(2.0))
--> Awaitable[Any]
- - 'operation': Async callable representing the action to retry upon failure.
- - 'max_retries': Maximum number of attempts on failure before giving up.
- - 'base_delay': Initial delay between retries in seconds.
- - 'max_delay': Maximum delay between retries in seconds after backoff growth stops increasing it further.
- - ‘exponential_base’: Multiplier applied per attempt when calculating backoff duration.
+   self,
+   operation: Callable[[], Awaitable[Any]],
+   max_retries:int=3, base_delay=float=1.0, max_delay=float=60.0, exponential_base=float=2.0
+ ) -> Awaitable[Any]
+ - Executes an async operation with retry logic and backoff delay; handles transient DB/network failures.
 
-#### insert_one(
-      self, document : Dict ,
-      validate : bool=True ) -> Awaitable[str]
-   - ‘document’: The document dictionary that will be inserted into collection .
-   - ‘validate’ : If true , input gets sanitized .
+#### insert_one(self, document: Dict, validate=True) -> Awaitable[str]
+ - Inserts one document into collection; returns inserted ID as string; validates if specified.
 
- #### find_one (
-     self , query : Dict ,
-     projection : Optional [Dict ]=None )
-      -> Awaitable[Optional [Dict]]
-   – ‘query’ dictionary specifying search conditions .
-   – ‘projection’ optional dict specifying fields returned .
+#### find_one(
+     self,
+     query : Dict ,
+     projection : Optional[Dict] = None 
+ ) -> Awaitable[Optional[Dict]]
+ - Finds one matching document by query with optional projection fields.
 
- #### find_many (
-     self , query : Dict ,
-     projection : Optional [Dict ]=None ,
-     sort : Optional [List [tuple]]=None ,
-     limit:int=None , skip:int=None )
-       →Awaitable[List[Dict]]
-   – ‘query’ dict filter;
-   – ‘projection’ optional field selector;
-   – ‘sort ’ list of key/direction tuples;
-   – ’limit ’ maximum docs;
-   – ’skip ’ offset .
+#### find_many(
+     self ,
+     query : Dict ,
+     projection : Optional[Dict]=None , 
+     sort : Optional[List[tuple]] = None ,
+     limit : Optional[int ]=None , 
+     skip : Optional[int ]=None  
+ ) -> Awaitable[List [Dict]]
+ - Finds multiple documents matching query with optional sort/limit/skip/projection options.
 
- #### update_one (
-     self , query : Dict ,
-     update_data_:Dict ,
-     upsert_:bool=False ,
-     validate_:bool=True ) 
-         →Awaitable[bool]
-   --‘query’, filter dict ;
-   --‘update_data’, changes ;
-   --'upsert', create if missing?;
-   --'validate', sanitize fields
+#### update_one(
+   self , 
+   query : Dict , 
+   update_data : Dict , 
+   upsert=False , 
+   validate=True  
+ ) -> Awaitable [bool]
+ - Updates first matching document using $set; returns true if changed/upserted.
 
- #### update_many (
-    self , query_:{dict} , update_data:{dict} , validate:{bool}=True )→Awaitable[int]
--- Query filters docs updated ; 
--- Update_data values set ;
--- Whether inputs are sanitized .
+#### update_many(
+      self ,
+      query : Dict ,
+      update_data : Dict ,
+      validate=True      
+ ) ->Awaitable [int ]
+ - Updates all matching documents using $set; returns count modified.
 
- ##### delete_one (
-    self,, query:{dict})->Awaitable[boo l ]
-—Query identifies which doc .
+#### delete_one(
+        self ,
+        query:req.Dict   
+ )->Awaitable [bool ]
+ - Deletes first matching document by sanitized query dict; returns true if deleted
 
-##### delete_many(
-self,,query:{dict })->Awaitabl e[int ]
-—Filter deletes matching documents.
+#### delete_many (
+       self ,
+       query:req.Dict   
+ )->Awaitable[int ]
+ - Deletes all matching documents by sanitized query dict ;returns count deleted 
 
-##### insert_many(
-self,,documents:[list],validate=True)->Awaita ble[List[str]] 
-—Docs inserted ; each gets validated if requested.
+ #### insert_many (
+         self ,    
+         documents¨List [Dict ],
+         validate¨True     
+ )->Await able<List[str]>
+ – Inserts multiple docs (list). Returns list of inserted IDs as strings
 
-##### find_paginated(
-self.,query{dict},skip:int,l imit:int,sort=(Opt)[list])→Aw aitab le[{str:any}]
-–Filter/docs returned with pagination and metadata info.
+  
+ #### find_paginated (
+        self ,name=query:Object,int skip,int limit.,sort=None )
+– Finds docs w/pagination .Returns paginated result set+metadata dict.
+//
+///
+   
 
-##### aggregate (
-self,pipeline:[Li st[dic t]])-> Awa i table[List[d ic t] ]
-–Aggregation pipeline applied ; returns processed results.
+      
 
-##### transaction (self )  
-–Async context manager yielding session object used inside with blocks .
+##### aggregate( s elf,pipeline,List(Dict)) → Awaitab le[List(Dict)]//
+ – Runs aggregation p ipeline,list,result sa s list(dict)
+         
 
- ##### update_page_and_clear_task(
-self,page_id:str,u pdate_da ta::{d ict } task_query::d ict )
- →Await able[b oo l]
- —Atomically updates page then removes processing queue task using transaction.
+##### transaction(s elf )
+ –Context manager for MongoDB session-based transact ion.Yields session
+ 
+   
 
- ##### create_indexes (se lf.,indexes::Lis t[dic t ])
- —Bulk index creation.; indexes specify keys(+options).
+###### update_page_and_clear_task( sel f,page_id:str,,update_data:D ict task_query:D ic t)->A wait ab le[b o ol]/////
+–Performs atomic transactional op:update page & clear proc essing task .Returns success boolean.
 
-##### get_collection_stats(s elf )  
-—No params.; returns size/usage/indexes info dict.
+##### get_collection_stats( s elf)->Awaita ble[D ict ]
+–Fetches basic stats about physical collect ion size/storage/index/doc sizes.
 
-###### close(se lf):
-–No params; closes Mongo client connection cleanly .
+##### close( se lf)
+/* Closes client/pool connection */
