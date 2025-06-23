@@ -10,6 +10,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from bson import ObjectId
 from typing import Dict, Any, List
 
+from doc_crawler.database.models.historical_date import HistoricalDate
+
 # Test Data Fixtures
 
 @pytest.fixture
@@ -257,3 +259,16 @@ def simulate_db_error():
     def _simulate_error(mock_method, error_type=DatabaseError, error_message="Database error"):
         mock_method.side_effect = error_type(error_message)
     return _simulate_error
+
+@pytest.fixture
+def sample_work_data():
+    """Sample work data for testing."""
+    return {
+        "author_name": "Aristotle",
+        "work_title": "Nicomachean Ethics",
+        "publication_date": HistoricalDate.parse_date_string("March 15, 44 BCE"),
+        "site_id": ObjectId(),
+        "page_id": ObjectId(),
+        "work_id": "aristotle-ethics-1",
+        "tags": ["ethics", "virtue", "ancient"]
+    }

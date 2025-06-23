@@ -5,10 +5,13 @@ from pydantic import (
     BaseModel,
     Field,
     field_validator,
+    computed_field,
     ConfigDict,
     BeforeValidator,
     PlainSerializer,
 )
+
+from doc_crawler.database.models.historical_date import HistoricalDate
 
 # Helper for ObjectId serialization
 PyObjectId = Annotated[
@@ -22,26 +25,14 @@ class AuthorWork(BaseModel):
     id: Optional[PyObjectId] = Field(None, alias="_id", description="Unique identifier for the work.")
     author_name: str = Field(..., description="Name of the author.")
     work_title: str = Field(..., description="Title of the philosophical work.")
-    publication_date: Optional[str] = Field(None, description="Publication date of the work (e.g., '2023-01-01').")
+    publication_date: Optional[HistoricalDate] = Field(None, description="Publication date of the work (e.g., '2023-01-01').")
     site_id: PyObjectId = Field(..., description="Reference to the `sites` collection where the work was found.")
     page_id: PyObjectId = Field(..., description="Reference to the `pages` collection where the work is stored.")
     work_id: Optional[str] = Field(None, description="External identifier for deduplication (e.g., DOI, ISBN).")
     tags: List[str] = Field(default=[], description="Tags for categorizing the work.")
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Timestamp when the work was added.")
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Timestamp when the work was last updated.")
-
-    @field_validator("publication_date")
-    @classmethod
-    def validate_publication_date(cls, v: Optional[str]) -> Optional[str]:
-        """Ensure the publication date is in a valid format (YYYY-MM-DD)."""
-        if v is None:
-            return v
-        try:
-            datetime.strptime(v, "%Y-%m-%d")
-        except ValueError:
-            raise ValueError("Publication date must be in the format 'YYYY-MM-DD'.")
-        return v
-
+    
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         populate_by_name=True,  # Allow aliasing (e.g., `_id` -> `id`)

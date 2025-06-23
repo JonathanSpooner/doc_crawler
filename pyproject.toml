@@ -16,7 +16,8 @@ dependencies = [
     "pymongo>=4.13.2",
     "motor>=3.7.1",
     "loguru>=0.7.3",
-    "boto3>=1.38.41"
+    "boto3>=1.38.41",
+    "pendulum>=3.1.0"
 ]
 
 [project.optional-dependencies]

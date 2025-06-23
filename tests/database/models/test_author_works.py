@@ -1,14 +1,14 @@
-import pytest
 from datetime import datetime, UTC
 from bson import ObjectId
-from doc_crawler.database.models.author_works import AuthorWork, PyObjectId
+from doc_crawler.database.models.author_works import AuthorWork
+from doc_crawler.database.models.historical_date import HistoricalDate
 
 def test_author_work_creation():
     """Test basic creation of an AuthorWork instance."""
     work = AuthorWork(
         author_name="Immanuel Kant",
         work_title="Critique of Pure Reason",
-        publication_date="1781-01-01",
+        publication_date=HistoricalDate.parse_date_string("1781-01-01"),
         site_id=str(ObjectId()),
         page_id=str(ObjectId()),
         work_id="ISBN-1234567890",
@@ -17,7 +17,7 @@ def test_author_work_creation():
 
     assert work.author_name == "Immanuel Kant"
     assert work.work_title == "Critique of Pure Reason"
-    assert work.publication_date == "1781-01-01"
+    assert work.publication_date == HistoricalDate.parse_date_string("1781-01-01")
     assert isinstance(work.site_id, str)
     assert isinstance(work.page_id, str)
     assert work.work_id == "ISBN-1234567890"
@@ -42,7 +42,11 @@ def test_author_work_defaults():
 
 def test_author_work_publication_date_validation_valid():
     """Test valid publication date formats."""
-    valid_dates = ["2023-01-01", "1999-12-31", None]
+    valid_dates = [
+        HistoricalDate.parse_date_string("2023-01-01"), 
+        HistoricalDate.parse_date_string("1999-12-31"), 
+        None
+    ]
     for date in valid_dates:
         work = AuthorWork(
             author_name="Test Author",
@@ -52,19 +56,6 @@ def test_author_work_publication_date_validation_valid():
             page_id=str(ObjectId()),
         )
         assert work.publication_date == date
-
-def test_author_work_publication_date_validation_invalid():
-    """Test invalid publication date formats."""
-    invalid_dates = ["2023/01/01", "31-12-1999", "Jan 1, 2023", ""]
-    for date in invalid_dates:
-        with pytest.raises(ValueError, match="Publication date must be in the format 'YYYY-MM-DD'."):
-            AuthorWork(
-                author_name="Test Author",
-                work_title="Test Work",
-                publication_date=date,
-                site_id=str(ObjectId()),
-                page_id=str(ObjectId()),
-            )
 
 def test_author_work_id_alias():
     """Test that `_id` is aliased to `id`."""

@@ -119,10 +119,6 @@
  #### find_paginated (
         self ,name=query:Object,int skip,int limit.,sort=None )
 – Finds docs w/pagination .Returns paginated result set+metadata dict.
-//
-///
-   
-
       
 
 ##### aggregate( s elf,pipeline,List(Dict)) → Awaitab le[List(Dict)]//
