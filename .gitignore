@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+venv/
+env/
+.venv/
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.coverage
+crawler-env/
+doc_crawler.egg-info

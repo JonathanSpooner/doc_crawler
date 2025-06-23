@@ -1,0 +1,22 @@
+# Production environment overrides
+
+logging:
+  level: INFO
+  file_path: "/var/log/philosophy-crawler/crawler.log"
+  structured: true
+
+database:
+  pool_size: 20
+  max_overflow: 30
+
+security:
+  rate_limit_per_minute: 100
+  api_key: "apikey-xxxxxx"
+
+crawling:
+  default_delay: 2.0
+  max_concurrent_requests: 10
+  max_pages_per_domain: 5000
+
+debug: false
+hot_reload: false

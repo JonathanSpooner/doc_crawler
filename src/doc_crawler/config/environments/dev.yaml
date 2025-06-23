@@ -1,0 +1,21 @@
+# Development environment overrides
+
+logging:
+  level: DEBUG
+  file_path: "logs/crawler-dev.log"
+  crawler_level: DEBUG
+  config_level: INFO
+
+database:
+  echo: true
+  pool_size: 2
+
+crawling:
+  default_delay: 0.5
+  max_concurrent_requests: 2
+
+debug: true
+hot_reload: true
+
+notifications:
+  enabled: false

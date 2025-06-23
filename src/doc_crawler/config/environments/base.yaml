@@ -1,0 +1,59 @@
+# Base configuration for Philosophy Text Crawler
+# This file contains default settings that apply to all environments
+
+database:
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+  echo: false
+  url: "postgresql://user:pass@localhost:5432/crawler_db"
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+  structured: false
+  crawler_level: INFO
+  config_level: WARNING
+  database_level: WARNING
+
+security:
+  token_expiry: 3600
+  rate_limit_per_minute: 60
+  allowed_hosts: []
+  cors_origins: []
+  secret_key: "secret-xxxxx"
+
+crawling:
+  default_delay: 1.0
+  max_concurrent_requests: 5
+  request_timeout: 30
+  max_retries: 3
+  retry_delay: 2.0
+  user_agent: "PhilosophyCrawler/1.0 (+https://example.com/crawler-info)"
+  respect_robots_txt: true
+  max_page_size: 10485760  # 10MB
+  allowed_content_types:
+    - "text/html"
+    - "application/xhtml+xml"
+  min_delay: 0.5
+  burst_delay: 5.0
+  max_pages_per_domain: 1000
+
+notifications:
+  enabled: true
+  error_threshold: 10
+  failure_rate_threshold: 0.1
+  queue_size_threshold: 1000
+  max_alerts_per_hour: 5
+  email:
+    smtp_server: "smtp.example.com"
+    username: "username"
+    password: "password"
+    from_address: "user@example.com"
+    recipients: ["receipt@example.com", "receipt2@example.com"]
+
+debug: false
+hot_reload: false

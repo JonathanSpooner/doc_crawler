@@ -1,0 +1,46 @@
+# Internet Encyclopedia of Philosophy configuration
+
+name: "Internet Encyclopedia of Philosophy"
+base_url: "https://iep.utm.edu"
+domains:
+  - "iep.utm.edu"
+
+enabled: true
+priority: 1
+
+allowed_urls:
+  - pattern: "^https://iep\\.utm\\.edu/[a-zA-Z0-9-]+/?$"
+    type: "regex"
+    description: "Main article pages"
+
+denied_urls:
+  - pattern: "^https://iep\\.utm\\.edu/wp-admin.*"
+    type: "regex"
+    description: "Admin pages"
+
+content_selectors:
+  - name: "main_content"
+    selector: "#post-content"
+    type: "css"
+    required: true
+  - name: "references"
+    selector: "#references"
+    type: "css"
+    required: false
+
+title_selector: "h1.entry-title"
+author_selector: ".entry-meta .author"
+
+delay: 2.0
+max_concurrent: 2
+requests_per_minute: 20
+daily_limit: 1000
+
+clean_html: true
+extract_links: true
+follow_links: true
+max_depth: 3
+
+health_check_url: "https://iep.utm.edu"
+monitor_changes: true
+notification_level: "medium"

@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doc_crawler"
+version = "0.0.1"
+dependencies = [
+    "pydantic>=2.0.0",
+    "PyYAML>=6.0",
+    "python-dotenv>=1.0.0",
+    "watchdog>=3.0.0",
+    "jsonschema>=4.0.0",
+    "pydantic_settings>=2.10",
+    "aioresponses>=0.7.8",
+    "pymongo>=4.13.2",
+    "motor>=3.7.1",
+    "loguru>=0.7.3",
+    "boto3>=1.38.41"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=6.2.1"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["doc_crawler*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration (deselect with '-m \"not integration\"')",
+    "serial",
+]
+asyncio_mode = "auto"
